@@ -1,4 +1,4 @@
-name: Flutter CI & Pgyer Upload
+name: FlutterCI&PgyerUpload
 
 on:
   push:
@@ -57,11 +57,15 @@ jobs:
 
       # 🔟 上传到蒲公英
       - name: Upload to Pgyer
+        shell: bash
+        env:
+          PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
+          PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
         run: |
           echo "Uploading APK to Pgyer..."
           response=$(curl -s -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
-                            -F "_api_key=${{ secrets.PGY_API_KEY }}" \
-                            -F "uKey=${{ secrets.PGY_USER_KEY }}" \
+                            -F "_api_key=$PGY_API_KEY" \
+                            -F "uKey=$PGY_USER_KEY" \
                             https://www.pgyer.com/apiv2/app/upload)
           echo "Response from Pgyer:"
           echo "$response"
