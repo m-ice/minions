@@ -95,10 +95,11 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 465
-          username: ${{ secrets.MAIL_USER }}
-          password: ${{ secrets.MAIL_PASS }}
+          username: ${{ secrets.MAIL_USER }}   # 你的 Gmail 邮箱
+          password: ${{ secrets.MAIL_PASS }}   # Gmail 应用专用密码
           subject: "APK Upload Result"
           body: |
             APK uploaded successfully!
             Download URL: ${{ steps.upload.outputs.app_url }}
           to: unaos@qq.com
+          from: ${{ secrets.MAIL_USER }}       # 必须指定发件人邮箱
