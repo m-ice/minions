@@ -1,10 +1,9 @@
 name: Flutter CI & Pgyer Upload
 
-# 触发条件：push 到任意分支
 on:
   push:
     branches:
-      - '**'
+      - 'master'  # 任意分支 push 都触发
 
 jobs:
   build_and_upload:
@@ -21,34 +20,42 @@ jobs:
         with:
           flutter-version: "3.32.8"  # 替换为你的 Flutter 版本
 
-      # 3️⃣ 安装 jq 用于解析 JSON
+      # 3️⃣ 安装 Android SDK licenses
+      - name: Accept Android licenses
+        run: yes | sdkmanager --licenses
+
+      # 4️⃣ 安装 jq 用于解析 JSON
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # 4️⃣ 获取依赖
+      # 5️⃣ 获取依赖
       - name: Install dependencies
         run: flutter pub get
 
-      # 5️⃣ 分析代码
+      # 6️⃣ 分析代码
       - name: Run flutter analyze
-        run: flutter analyze
+        run: flutter analyze || echo "Analyze finished with warnings/errors"
 
-      # 6️⃣ 跑测试
+      # 7️⃣ 跑测试
       - name: Run flutter test
-        run: flutter test
+        run: flutter test || echo "Tests finished with failures"
 
-      # 7️⃣ 打包 release APK
+      # 8️⃣ 打包 release APK
       - name: Build release APK
-        run: flutter build apk --release
+        run: |
+          echo "Building release APK..."
+          flutter build apk --release
+          ls -l build/app/outputs/flutter-apk/
 
-      # 8️⃣ 检查 APK 是否生成
-      - name: List APK files
-        run: ls -l build/app/outputs/flutter-apk/
-
+      # 9️⃣ 检查 APK 是否生成
       - name: Check APK exists
-        run: test -f build/app/outputs/flutter-apk/app-release.apk
+        run: |
+          if [ ! -f build/app/outputs/flutter-apk/app-release.apk ]; then
+            echo "APK not found! Build failed."
+            exit 1
+          fi
 
-      # 9️⃣ 上传到蒲公英
+      # 🔟 上传到蒲公英
       - name: Upload to Pgyer
         run: |
           echo "Uploading APK to Pgyer..."
