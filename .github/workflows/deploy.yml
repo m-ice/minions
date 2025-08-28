@@ -1,8 +1,0 @@
-- name: Debug secrets
-  run: |
-    echo "PGY_API_KEY length: ${#PGY_API_KEY}"
-    echo "PGY_USER_KEY length: ${#PGY_USER_KEY}"
-  shell: bash
-  env:
-    PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
-    PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
