@@ -1,4 +1,4 @@
-name: FlutterCI&PgyerUpload
+name: Flutter CI & Pgyer Upload
 
 on:
   push:
