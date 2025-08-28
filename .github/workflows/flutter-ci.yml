@@ -1,44 +1,54 @@
-name: Flutter CI
+name: Flutter CI & Pgyer Upload
 
+# 触发条件：push 到 main 分支
 on:
   push:
     branches:
       - main
 
 jobs:
-  build:
+  build_and_upload:
     runs-on: ubuntu-latest
-    # 1. 拉取代码
+
     steps:
-      - name: Checkout source code
+      # 1️⃣ 拉取代码
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. 安装 Flutter
+      # 2️⃣ 安装 Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.32.8" # 你的 Flutter 版本
+          flutter-version: "3.32.8"  # 替换为你的 Flutter 版本
 
-      # 3. 获取依赖
+      # 3️⃣ 获取依赖
       - name: Install dependencies
         run: flutter pub get
 
-      # 4. 分析代码
-      - name: Run analyze
+      # 4️⃣ 分析代码
+      - name: Run flutter analyze
         run: flutter analyze
 
-      # 5. 跑测试
-      - name: Run tests
+      # 5️⃣ 跑测试
+      - name: Run flutter test
         run: flutter test
 
-      # 6. 打包 APK
+      # 6️⃣ 打包 release APK
       - name: Build release APK
         run: flutter build apk --release
 
-      # 7. 上传到蒲公英
+      # 7️⃣ 检查 APK 是否生成
+      - name: List APK files
+        run: ls -l build/app/outputs/flutter-apk/
+
+      - name: Check APK exists
+        run: test -f build/app/outputs/flutter-apk/app-release.apk
+
+      # 8️⃣ 上传到蒲公英
       - name: Upload to Pgyer
         run: |
-          curl -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
+          echo "Uploading APK to Pgyer..."
+          curl -v -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
                -F "_api_key=${{ secrets.PGY_API_KEY }}" \
                -F "uKey=${{ secrets.PGY_USER_KEY }}" \
                https://www.pgyer.com/apiv2/app/upload
