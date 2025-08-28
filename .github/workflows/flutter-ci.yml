@@ -1,10 +1,10 @@
 name: Flutter CI & Pgyer Upload
 
-# 触发条件：push 到 main 分支
+# 触发条件：push 到任意分支
 on:
   push:
     branches:
-      - master
+      - '**'
 
 jobs:
   build_and_upload:
@@ -21,34 +21,49 @@ jobs:
         with:
           flutter-version: "3.32.8"  # 替换为你的 Flutter 版本
 
-      # 3️⃣ 获取依赖
+      # 3️⃣ 安装 jq 用于解析 JSON
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # 4️⃣ 获取依赖
       - name: Install dependencies
         run: flutter pub get
 
-      # 4️⃣ 分析代码
+      # 5️⃣ 分析代码
       - name: Run flutter analyze
         run: flutter analyze
 
-      # 5️⃣ 跑测试
+      # 6️⃣ 跑测试
       - name: Run flutter test
         run: flutter test
 
-      # 6️⃣ 打包 release APK
+      # 7️⃣ 打包 release APK
       - name: Build release APK
         run: flutter build apk --release
 
-      # 7️⃣ 检查 APK 是否生成
+      # 8️⃣ 检查 APK 是否生成
       - name: List APK files
         run: ls -l build/app/outputs/flutter-apk/
 
       - name: Check APK exists
         run: test -f build/app/outputs/flutter-apk/app-release.apk
 
-      # 8️⃣ 上传到蒲公英
+      # 9️⃣ 上传到蒲公英
       - name: Upload to Pgyer
         run: |
           echo "Uploading APK to Pgyer..."
-          curl -v -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
-               -F "_api_key=${{ secrets.PGY_API_KEY }}" \
-               -F "uKey=${{ secrets.PGY_USER_KEY }}" \
-               https://www.pgyer.com/apiv2/app/upload
+          response=$(curl -s -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
+                            -F "_api_key=${{ secrets.PGY_API_KEY }}" \
+                            -F "uKey=${{ secrets.PGY_USER_KEY }}" \
+                            https://www.pgyer.com/apiv2/app/upload)
+          echo "Response from Pgyer:"
+          echo "$response"
+
+          # 提取下载 URL（如果上传成功）
+          app_url=$(echo $response | jq -r '.data.downloadUrl')
+          if [ "$app_url" != "null" ]; then
+            echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
+          else
+            echo "Upload failed, please check the response above."
+            exit 1
+          fi
