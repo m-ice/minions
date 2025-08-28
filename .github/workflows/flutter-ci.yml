@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '**'  # 任意分支 push 都触发
+    tags:
+      - '*'
 
 jobs:
   build_and_upload:
