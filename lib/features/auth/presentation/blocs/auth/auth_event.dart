@@ -9,12 +9,9 @@ sealed class AuthEvent extends Equatable{
 
 class AppStarted extends AuthEvent {}
 class LoggedIn extends AuthEvent {
-
   final String username;
   final String password;
-
   LoggedIn(this.username, this.password);
-
   @override
   List<Object?> get props => [username, password];
 }

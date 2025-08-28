@@ -1,0 +1,4 @@
+- name: Upload to Pgyer
+  run: |
+    echo ${{ secrets.PGY_API_KEY }}
+    echo ${{ secrets.PGY_USER_KEY }}

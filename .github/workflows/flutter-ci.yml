@@ -1,0 +1,44 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # 1. 拉取代码
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      # 2. 安装 Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.32.8" # 你的 Flutter 版本
+
+      # 3. 获取依赖
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 4. 分析代码
+      - name: Run analyze
+        run: flutter analyze
+
+      # 5. 跑测试
+      - name: Run tests
+        run: flutter test
+
+      # 6. 打包 APK
+      - name: Build release APK
+        run: flutter build apk --release
+
+      # 7. 上传到蒲公英
+      - name: Upload to Pgyer
+        run: |
+          curl -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
+               -F "_api_key=${{ secrets.PGY_API_KEY }}" \
+               -F "uKey=${{ secrets.PGY_USER_KEY }}" \
+               https://www.pgyer.com/apiv2/app/upload
