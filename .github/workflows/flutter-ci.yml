@@ -60,24 +60,26 @@ jobs:
           PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
           PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
         run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+
+          if [ ! -f "$APK_PATH" ]; then
+            echo "APK not found at $APK_PATH"
+            exit 1
+          fi
+
           echo "Uploading APK to Pgyer..."
-          # 上传 APK
-          response=$(curl -s -F "file=@build/app/outputs/flutter-apk/app-release.apk" \
+          response=$(curl -s -F "file=@$APK_PATH" \
                             -F "_api_key=$PGY_API_KEY" \
                             -F "uKey=$PGY_USER_KEY" \
                             https://www.pgyer.com/apiv2/app/upload)
+
           echo "Response from Pgyer:"
           echo "$response"
 
-          # 提取下载 URL（需要 jq）
-          if command -v jq >/dev/null 2>&1; then
-            app_url=$(echo $response | jq -r '.data.downloadUrl')
-            if [ "$app_url" != "null" ]; then
-              echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
-            else
-              echo "Upload failed, please check the response above."
-              exit 1
-            fi
+          app_url=$(echo "$response" | jq -r '.data?.downloadUrl')
+          if [ "$app_url" != "null" ]; then
+            echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
           else
-            echo "jq not installed, cannot parse response JSON"
+            echo "Upload failed, please check the response above."
+            exit 1
           fi
