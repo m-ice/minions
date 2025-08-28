@@ -55,6 +55,7 @@ jobs:
 
       # 🔟 上传到蒲公英
       - name: Upload to Pgyer
+        id: upload   # 给 step 一个 id
         shell: bash
         env:
           PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
@@ -82,12 +83,17 @@ jobs:
           else
             app_url=$(echo "$response" | sed -n 's/.*"downloadUrl":"\([^"]*\)".*/\1/p')
           fi
-          # 判断上传是否成功
+
           if [ -n "$app_url" ] && [ "$app_url" != "null" ]; then
             echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
           else
             echo "Upload failed, please check the response above."
+            app_url=""   # 确保失败时输出空
           fi
+
+          # 🔑 把 app_url 设置为 step 输出，供后续步骤使用
+          echo "app_url=$app_url" >> $GITHUB_OUTPUT
+
 
       - name: Send notification
         if: always()
@@ -99,7 +105,58 @@ jobs:
           password: ${{ secrets.MAIL_PASS }}   # Gmail 应用专用密码
           subject: "APK Upload Result"
           body: |
-            APK uploaded successfully!
+            APK Upload Finished!
+
+            Result: ${{ steps.upload.outputs.app_url != '' && 'Success ✅' || 'Failed ❌' }}
             Download URL: ${{ steps.upload.outputs.app_url }}
           to: unaos@qq.com
-          from: ${{ secrets.MAIL_USER }}       # 必须指定发件人邮箱
+          from: ${{ secrets.MAIL_USER }}       # 发件人邮箱
+#      - name: Upload to Pgyer
+#        shell: bash
+#        env:
+#          PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
+#          PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
+#        run: |
+#          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+#
+#          if [ ! -f "$APK_PATH" ]; then
+#            echo "APK not found at $APK_PATH"
+#            exit 1
+#          fi
+#
+#          echo "Uploading APK to Pgyer..."
+#          response=$(curl -s -F "file=@$APK_PATH" \
+#                            -F "_api_key=$PGY_API_KEY" \
+#                            -F "uKey=$PGY_USER_KEY" \
+#                            https://www.pgyer.com/apiv2/app/upload)
+#
+#          echo "Response from Pgyer:"
+#          echo "$response"
+#
+#          # 提取下载地址
+#          if command -v jq >/dev/null 2>&1; then
+#            app_url=$(echo "$response" | jq -r '.data.downloadUrl // empty')
+#          else
+#            app_url=$(echo "$response" | sed -n 's/.*"downloadUrl":"\([^"]*\)".*/\1/p')
+#          fi
+#          # 判断上传是否成功
+#          if [ -n "$app_url" ] && [ "$app_url" != "null" ]; then
+#            echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
+#          else
+#            echo "Upload failed, please check the response above."
+#          fi
+#
+#      - name: Send notification
+#        if: always()
+#        uses: dawidd6/action-send-mail@v3
+#        with:
+#          server_address: smtp.gmail.com
+#          server_port: 465
+#          username: ${{ secrets.MAIL_USER }}   # 你的 Gmail 邮箱
+#          password: ${{ secrets.MAIL_PASS }}   # Gmail 应用专用密码
+#          subject: "APK Upload Result"
+#          body: |
+#            APK uploaded successfully!
+#            Download URL: ${{ steps.upload.outputs.app_url }}
+#          to: unaos@qq.com
+#          from: ${{ secrets.MAIL_USER }}       # 必须指定发件人邮箱
