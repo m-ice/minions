@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "378818198324",
+    "project_id": "minions-3f7cc",
+    "storage_bucket": "minions-3f7cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:378818198324:android:fbd2bd8639a01d54f2c361",
+        "android_client_info": {
+          "package_name": "com.mice.minions"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwMLOGbfEWmJcVKldEfAUP3H_T3Bq3eEU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
