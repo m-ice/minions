@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -12,7 +14,7 @@ val envProperties = Properties().apply {
 android {
     namespace = "com.mice.minions"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+//    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

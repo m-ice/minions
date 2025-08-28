@@ -20,9 +20,7 @@ jobs:
         with:
           flutter-version: "3.32.8"  # 替换为你的 Flutter 版本
           android-license: true   # 自动接受 Android SDK licenses
-#      # 3️⃣ 安装 Android SDK licenses
-#      - name: Accept Android licenses
-#        run: yes | sdkmanager --licenses
+
 
       # 4️⃣ 安装 jq 用于解析 JSON
       - name: Install jq
