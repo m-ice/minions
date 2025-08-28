@@ -55,7 +55,7 @@ jobs:
 
       # 🔟 上传到蒲公英
       - name: Upload to Pgyer
-        id: upload   # 给 step 一个 id
+        id: upload
         shell: bash
         env:
           PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
@@ -77,23 +77,23 @@ jobs:
           echo "Response from Pgyer:"
           echo "$response"
 
-          # 提取下载地址
+          # 提取 buildShortcutUrl
           if command -v jq >/dev/null 2>&1; then
-            app_url=$(echo "$response" | jq -r '.data.downloadUrl // empty')
+            shortcut=$(echo "$response" | jq -r '.data.buildShortcutUrl // empty')
           else
-            app_url=$(echo "$response" | sed -n 's/.*"downloadUrl":"\([^"]*\)".*/\1/p')
+            shortcut=$(echo "$response" | sed -n 's/.*"buildShortcutUrl":"\([^"]*\)".*/\1/p')
           fi
 
-          if [ -n "$app_url" ] && [ "$app_url" != "null" ]; then
-            echo "APK uploaded successfully! Download URL: https://www.pgyer.com/$app_url"
+          if [ -n "$shortcut" ] && [ "$shortcut" != "null" ]; then
+            app_url="https://www.pgyer.com/$shortcut"
+            echo "APK uploaded successfully! Download URL: $app_url"
           else
             echo "Upload failed, please check the response above."
-            app_url=""   # 确保失败时输出空
+            app_url=""
           fi
 
-          # 🔑 把 app_url 设置为 step 输出，供后续步骤使用
+          # 设置 step 输出
           echo "app_url=$app_url" >> $GITHUB_OUTPUT
-
 
       - name: Send notification
         if: always()
