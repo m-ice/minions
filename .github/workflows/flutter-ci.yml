@@ -99,5 +99,6 @@ jobs:
           password: ${{ secrets.MAIL_PASS }}
           subject: "APK Upload Result"
           body: |
-            ${{ steps.upload.outputs.app_url }}
+            APK uploaded successfully!
+            Download URL: ${{ steps.upload.outputs.app_url }}
           to: unaos@qq.com
