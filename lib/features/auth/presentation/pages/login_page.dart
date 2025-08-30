@@ -13,7 +13,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('登录')),
       body: Padding(
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           left: 16,
           right: 16,
           top: 120,
@@ -27,12 +27,12 @@ class LoginPage extends StatelessWidget {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
               ],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.person),
               ),
             ),
 
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(
                 top: 30,
                 bottom: 60
@@ -50,13 +50,13 @@ class LoginPage extends StatelessWidget {
                   context.read<AuthBloc>().add(LoggedIn('mice','123456'));
                 },
                 child: Ink(
-                    padding: EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: Theme.of(context).primaryColor
                     ),
                     child: Center(child: DefaultTextStyle(style: AppTheme.darkTheme.textTheme.bodyMedium!,
-                        child: Text('点击登录'))
+                        child: const Text('点击登录'))
 
                     )),
               ),

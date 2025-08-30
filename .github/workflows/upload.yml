@@ -1,0 +1,131 @@
+name: Flutter CI & Distribute
+
+on:
+  push:
+    branches:
+      - '**'   # 任意分支 push 触发
+    tags:
+      - '*'    # 打 tag 也触发
+
+jobs:
+  # ---------------- Android 构建并分发 ----------------
+  android:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ 拉取代码
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ 安装 Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.32.8"
+          android-license: true
+
+      # 3️⃣ 安装依赖工具
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          flutter pub get
+
+      # 4️⃣ 代码分析
+      - name: Run flutter analyze
+        run: flutter analyze || echo "Analyze finished with warnings/errors"
+
+      # 5️⃣ 打包 APK
+      - name: Build release APK
+        run: |
+          flutter build apk --release
+          ls -lh build/app/outputs/flutter-apk/
+
+      # 6️⃣ 上传到蒲公英
+      - name: Upload to Pgyer
+        id: upload_pgyer
+        shell: bash
+        env:
+          PGY_API_KEY: ${{ secrets.PGY_API_KEY }}
+          PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          echo "Uploading APK to Pgyer..."
+          response=$(curl -s -F "file=@$APK_PATH" \
+                            -F "_api_key=$PGY_API_KEY" \
+                            -F "uKey=$PGY_USER_KEY" \
+                            https://www.pgyer.com/apiv2/app/upload)
+
+          echo "Response from Pgyer: $response"
+          shortcut=$(echo "$response" | jq -r '.data.buildShortcutUrl // empty')
+          if [ -n "$shortcut" ] && [ "$shortcut" != "null" ]; then
+            echo "app_url=https://www.pgyer.com/$shortcut" >> $GITHUB_OUTPUT
+          else
+            echo "app_url=" >> $GITHUB_OUTPUT
+          fi
+
+      # 7️⃣ 上传到 Google Play
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.xxx.app   # 修改为你的包名
+          releaseFiles: build/app/outputs/flutter-apk/app-release.apk
+          track: internal            # internal / beta / production
+          status: completed
+
+      # 8️⃣ 邮件通知
+      - name: Send notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USER }}
+          password: ${{ secrets.MAIL_PASS }}
+          subject: "Android APK Upload Result"
+          body: |
+            ✅ Android Build Finished!
+
+            - Pgyer: ${{ steps.upload_pgyer.outputs.app_url }}
+            - Google Play: 已上传 (Track: internal)
+          to: unaos@qq.com
+          from: ${{ secrets.MAIL_USER }}
+
+  # ---------------- iOS 构建并分发 ----------------
+  ios:
+    runs-on: macos-latest
+
+    steps:
+      # 1️⃣ 拉取代码
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ 安装 Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.32.8"
+
+      # 3️⃣ 安装依赖
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 4️⃣ 打包 IPA
+      - name: Build release IPA
+        run: flutter build ipa --release --no-codesign
+
+      # 5️⃣ 上传到 App Store TestFlight
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          echo "$APP_STORE_CONNECT_API_KEY" > AuthKey.p8
+          sudo gem install fastlane -NV
+          fastlane pilot upload \
+            --api_key_path AuthKey.p8 \
+            --api_key_id $APP_STORE_CONNECT_API_KEY_ID \
+            --issuer_id $APP_STORE_CONNECT_ISSUER_ID \
+            --ipa build/ios/ipa/*.ipa
