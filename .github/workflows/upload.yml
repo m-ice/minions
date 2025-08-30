@@ -50,19 +50,38 @@ jobs:
           PGY_USER_KEY: ${{ secrets.PGY_USER_KEY }}
         run: |
           APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+
+          if [ ! -f "$APK_PATH" ]; then
+            echo "APK not found at $APK_PATH"
+            exit 1
+          fi
+
           echo "Uploading APK to Pgyer..."
           response=$(curl -s -F "file=@$APK_PATH" \
                             -F "_api_key=$PGY_API_KEY" \
                             -F "uKey=$PGY_USER_KEY" \
                             https://www.pgyer.com/apiv2/app/upload)
 
-          echo "Response from Pgyer: $response"
-          shortcut=$(echo "$response" | jq -r '.data.buildShortcutUrl // empty')
-          if [ -n "$shortcut" ] && [ "$shortcut" != "null" ]; then
-            echo "app_url=https://www.pgyer.com/$shortcut" >> $GITHUB_OUTPUT
+          echo "Response from Pgyer:"
+          echo "$response"
+
+          # 提取 buildShortcutUrl
+          if command -v jq >/dev/null 2>&1; then
+            shortcut=$(echo "$response" | jq -r '.data.buildShortcutUrl // empty')
           else
-            echo "app_url=" >> $GITHUB_OUTPUT
+            shortcut=$(echo "$response" | sed -n 's/.*"buildShortcutUrl":"\([^"]*\)".*/\1/p')
           fi
+
+          if [ -n "$shortcut" ] && [ "$shortcut" != "null" ]; then
+            app_url="https://www.pgyer.com/$shortcut"
+            echo "APK uploaded successfully! Download URL: $app_url"
+          else
+            echo "Upload failed, please check the response above."
+            app_url=""
+          fi
+
+          # 设置 step 输出
+          echo "app_url=$app_url" >> $GITHUB_OUTPUT
 
       # 7️⃣ 上传到 Google Play
       - name: Upload to Google Play
