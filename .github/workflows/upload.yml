@@ -41,6 +41,12 @@ jobs:
           flutter build apk --release
           ls -lh build/app/outputs/flutter-apk/
 
+      # 打包 AAB（用于 Google Play）
+      - name: Build release AAB
+        run: |
+          flutter build appbundle --release
+          ls -lh build/app/outputs/bundle/release/
+
       # 6️⃣ 上传到蒲公英
       - name: Upload to Pgyer
         id: upload_pgyer
