@@ -9,12 +9,12 @@ class AppDialog extends StatelessWidget {
   final VoidCallback? onCancel;
 
   const AppDialog({
-    super.key,
     required this.title,
     required this.message,
     required this.confirmText,
-    this.cancelText,
     required this.onConfirm,
+    super.key,
+    this.cancelText,
     this.onCancel,
   });
 
@@ -26,7 +26,9 @@ class AppDialog extends StatelessWidget {
       content: Text(message),
       actions: [
         if (cancelText != null)
-          TextButton(onPressed: onCancel ?? () => Navigator.pop(context), child: Text(cancelText!)),
+          TextButton(
+              onPressed: onCancel ?? () => Navigator.pop(context),
+              child: Text(cancelText!)),
         ElevatedButton(onPressed: onConfirm, child: Text(confirmText)),
       ],
     );

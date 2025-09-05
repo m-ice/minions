@@ -5,19 +5,15 @@ import 'package:minions/app/theme.dart';
 
 import '../blocs/auth/auth_bloc.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class AuthPage extends StatelessWidget {
+  const AuthPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('登录')),
       body: Padding(
-        padding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 120,
-        ),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 120),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -27,38 +23,34 @@ class LoginPage extends StatelessWidget {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
               ],
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.person),
-              ),
+              decoration: const InputDecoration(prefixIcon: Icon(Icons.person)),
             ),
 
             const Padding(
-              padding: EdgeInsets.only(
-                top: 30,
-                bottom: 60
-              ),
+              padding: EdgeInsets.only(top: 30, bottom: 60),
               child: TextField(
-                obscureText:true,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock),
-                ),
+                obscureText: true,
+                decoration: InputDecoration(prefixIcon: Icon(Icons.lock)),
               ),
             ),
             Center(
               child: InkWell(
                 onTap: () {
-                  context.read<AuthBloc>().add(LoggedIn('mice','123456'));
+                  context.read<AuthBloc>().add(LoggedIn('mice', '123456'));
                 },
                 child: Ink(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Theme.of(context).primaryColor
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  child: Center(
+                    child: DefaultTextStyle(
+                      style: AppTheme.darkTheme.textTheme.bodyMedium!,
+                      child: const Text('点击登录'),
                     ),
-                    child: Center(child: DefaultTextStyle(style: AppTheme.darkTheme.textTheme.bodyMedium!,
-                        child: const Text('点击登录'))
-
-                    )),
+                  ),
+                ),
               ),
             ),
             // BlocBuilder<AuthBloc, AuthState>(

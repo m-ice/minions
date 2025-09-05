@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   /// 主色
-  static const Color primaryColor = Color(0xFF1976D2);
+  static const Color lightPrimaryColor = Color(0xFF1976D2);
+  static const Color darkPrimaryColor = Colors.pinkAccent;
 
   /// 次要色
-  static const Color secondaryColor = Color(0xFF42A5F5);
+  static const Color lightSecondaryColor = Color(0xFF42A5F5);
+  static const Color darkSecondaryColor = Color(0xFF00FFF5);
 
   /// 错误色
   static const Color errorColor = Color(0xFFD32F2F);
@@ -20,10 +22,16 @@ class AppTheme {
   );
 
   /// 通用按钮样式
-  static final ButtonStyle baseButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: primaryColor,
+  static final ButtonStyle lightBaseButtonStyle = ElevatedButton.styleFrom(
+    backgroundColor: lightPrimaryColor,
     foregroundColor: Colors.white,
-    shape: RoundedRectangleBorder(borderRadius: defaultRadius),
+    shape: const RoundedRectangleBorder(borderRadius: defaultRadius),
+  );
+
+  static final ButtonStyle darkBaseButtonStyle = ElevatedButton.styleFrom(
+    backgroundColor: darkPrimaryColor,
+    foregroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(borderRadius: defaultRadius),
   );
 
   /// 通用输入框样式
@@ -33,7 +41,7 @@ class AppTheme {
         borderRadius: defaultRadius,
         borderSide: BorderSide(color: borderColor, width: 1.5),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderRadius: defaultRadius,
         borderSide: BorderSide(color: Colors.grey, width: 1.0),
       ),
@@ -41,13 +49,13 @@ class AppTheme {
         borderRadius: defaultRadius,
         borderSide: BorderSide(color: focusedColor, width: 2.0),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: const OutlineInputBorder(
         borderRadius: defaultRadius,
-        borderSide: const BorderSide(color: errorColor, width: 1.5),
+        borderSide: BorderSide(color: errorColor, width: 1.5),
       ),
-      focusedErrorBorder: OutlineInputBorder(
+      focusedErrorBorder: const OutlineInputBorder(
         borderRadius: defaultRadius,
-        borderSide: const BorderSide(color: errorColor, width: 2.0),
+        borderSide: BorderSide(color: errorColor, width: 2.0),
       ),
     );
   }
@@ -55,40 +63,40 @@ class AppTheme {
   /// 亮色主题
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: primaryColor,
+    primaryColor: lightPrimaryColor,
     colorScheme: const ColorScheme.light(
-      primary: primaryColor,
-      secondary: secondaryColor,
+      primary: lightPrimaryColor,
+      secondary: lightSecondaryColor,
       error: errorColor,
     ),
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(
-      backgroundColor: primaryColor,
+      backgroundColor: lightPrimaryColor,
       foregroundColor: Colors.white,
       elevation: 0,
     ),
     textTheme: baseTextTheme,
-    elevatedButtonTheme: ElevatedButtonThemeData(style: baseButtonStyle),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: lightBaseButtonStyle),
     inputDecorationTheme: baseInputDecorationTheme(Colors.blue, Colors.blue),
   );
 
   /// 暗色主题
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primaryColor: primaryColor,
+    primaryColor: darkPrimaryColor,
     colorScheme: const ColorScheme.dark(
-      primary: primaryColor,
-      secondary: secondaryColor,
+      primary: darkPrimaryColor,
+      secondary: darkSecondaryColor,
       error: errorColor,
     ),
     scaffoldBackgroundColor: const Color(0xFF121212),
     appBarTheme: const AppBarTheme(
-      backgroundColor: primaryColor,
+      backgroundColor: darkPrimaryColor,
       foregroundColor: Colors.white,
       elevation: 0,
     ),
     textTheme: baseTextTheme,
-    elevatedButtonTheme: ElevatedButtonThemeData(style: baseButtonStyle),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: darkBaseButtonStyle),
     inputDecorationTheme: baseInputDecorationTheme(Colors.blueGrey, Colors.lightBlueAccent),
   );
 }

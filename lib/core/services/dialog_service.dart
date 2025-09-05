@@ -1,12 +1,17 @@
 import 'dart:collection';
+
 import 'package:flutter/material.dart';
+
+import '../../app/di.dart';
 
 class DialogService {
   static final DialogService _instance = DialogService._internal();
+
   factory DialogService() => _instance;
+
   DialogService._internal();
 
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey = getIt();
 
   final Queue<Future Function()> _dialogQueue = Queue();
   bool _isShowing = false;
@@ -29,11 +34,11 @@ class DialogService {
   }
 
   /// 队列封装 - 普通对话框
-  void showAppDialog(Widget dialog) {
+  void showAppDialog(Widget dialog, {bool barrierDismissible = false}) {
     enqueueDialog(() async {
       return showDialog(
         context: navigatorKey.currentContext!,
-        barrierDismissible: false,
+        barrierDismissible: barrierDismissible,
         builder: (_) => dialog,
       );
     });
@@ -51,7 +56,8 @@ class DialogService {
 
   /// Snackbar 不排队，立即展示（避免阻塞）
   void showSnackBar(String message) {
-    ScaffoldMessenger.of(navigatorKey.currentContext!)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      navigatorKey.currentContext!,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
